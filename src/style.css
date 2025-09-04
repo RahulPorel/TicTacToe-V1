@@ -1,8 +1,126 @@
-html {
-  color-scheme: light dark;
-  font-family: system-ui;
+@import "tailwindcss";
+
+:root {
+  /* RESPONSIVE FIX: Use modern CSS for a truly fluid board size.
+     It takes up 26% of the viewport width, but won't exceed 140px. */
+  --cell-size: min(26vw, 140px);
+  --gap-size: min(3vw, 10px);
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c3e 100%);
+  color: #f0f0f0;
+  overflow-x: hidden;
+}
+
+.font-pixel {
+  font-family: "Pixelify Sans", sans-serif;
+}
+
+.screen {
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.screen.hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  position: absolute;
+}
+
+.glass-card {
+  background: rgba(44, 44, 60, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, var(--cell-size));
+  grid-template-rows: repeat(3, var(--cell-size));
+  gap: var(--gap-size);
+  justify-content: center !important;
+}
+
+.cell {
+  background-color: rgba(26, 26, 26, 0.7);
+  border-radius: 16px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100%;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cell:hover {
+  background-color: rgba(58, 58, 58, 0.7);
+  transform: scale(1.05);
+}
+
+.cell.x::before,
+.cell.x::after {
+  content: "";
+  position: absolute;
+  width: calc(var(--cell-size) * 0.15);
+  height: calc(var(--cell-size) * 0.9);
+  background-color: #00d4ff;
+  border-radius: 10px;
+}
+.cell.x::before {
+  transform: rotate(45deg);
+}
+.cell.x::after {
+  transform: rotate(-45deg);
+}
+.cell.circle::before {
+  content: "";
+  position: absolute;
+  width: calc(var(--cell-size) * 0.9);
+  height: calc(var(--cell-size) * 0.9);
+  border-radius: 50%;
+  border: calc(var(--cell-size) * 0.15) solid #ff4d94;
+}
+
+.btn {
+  transition: all 0.3s ease;
+  border-radius: 9999px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 77, 148, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, #06d5ff, #ff4d94);
+}
+.btn-primary:hover {
+  box-shadow: 0 0 25px rgba(255, 77, 148, 0.7);
+}
+
+.input-field {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+.input-field:focus {
+  border-color: #06d5ff;
+  box-shadow: 0 0 15px rgba(6, 213, 255, 0.5);
+}
+
+.player-info {
+  transition: all 0.3s ease-in-out;
+}
+
+.player-active {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 20px var(--active-color, transparent),
+    inset 0 0 10px var(--active-color, transparent);
+  transform: scale(1.03);
 }
