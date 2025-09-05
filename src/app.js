@@ -17,7 +17,8 @@ import {
   getDocs,
 } from "firebase/firestore";
 
-// --- DOM Elements ---
+import "./icons.js"; // Importing the icons module to set up FontAwesome icons
+
 const screens = {
   auth: document.getElementById("auth-screen"),
   lounge: document.getElementById("game-lounge"),
@@ -43,14 +44,13 @@ const leaveGameBtn = document.getElementById("leave-game-btn");
 const nameTakenModal = document.getElementById("name-taken-modal");
 const closeModalBtn = document.getElementById("close-modal-btn");
 
-// --- Firebase Initialization ---
 const firebaseConfig = {
-  apiKey: "AIzaSyCg0IFol4ceyqbZ8UV3UXW04upZkKovK00",
-  authDomain: "tictactoev1rp.firebaseapp.com",
-  projectId: "tictactoev1rp",
-  storageBucket: "tictactoev1rp.firebasestorage.app",
-  messagingSenderId: "91921003930",
-  appId: "1:91921003930:web:ddddf314e7417dcf417623",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

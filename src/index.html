@@ -8,7 +8,13 @@
       name="description"
       content="Play Tic Tac Toe online with friends in real-time. Create or join matches instantly, track wins and losses, and enjoy a fun retro game experience."
     />
-
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/v4-shims.min.css"
+      integrity="sha512-7LGn7K+dj+CdmuqnrbIF/57brSK+L1DGyHMgby+dTT5n3Y6Bgmy/MmwHdaFRgLfLr6vwBA2yHplAutXldP8qAQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <meta name="theme-color" content="#000000" />
 
     <!-- PWA Manifest -->
@@ -41,10 +47,6 @@
       href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
 
     <!-- open graph meta tags for better SEO and social sharing -->
     <meta property="og:title" content="Play Tic Tac Toe Online" />
@@ -65,8 +67,7 @@
       content="Free multiplayer Tic Tac Toe — start a match instantly!"
     />
     <meta name="twitter:image" content="./assets/logo.png" />
-    <link rel="preload" href="./style.css" as="style" />
-    <link rel="preload" href="./app.js" as="script" />
+
     <link rel="stylesheet" href="style.css" />
 
     <script type="application/ld+json">
@@ -349,6 +350,6 @@
       </div>
     </div>
 
-    <script type="module" src="app.js" async></script>
+    <script type="module" src="app.js" defer></script>
   </body>
 </html>
