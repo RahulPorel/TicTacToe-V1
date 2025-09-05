@@ -3,6 +3,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
   doc,
+  getDoc,
   addDoc,
   onSnapshot,
   collection,
@@ -16,6 +17,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 
+// --- DOM Elements ---
 const screens = {
   auth: document.getElementById("auth-screen"),
   lounge: document.getElementById("game-lounge"),
@@ -41,21 +43,21 @@ const leaveGameBtn = document.getElementById("leave-game-btn");
 const nameTakenModal = document.getElementById("name-taken-modal");
 const closeModalBtn = document.getElementById("close-modal-btn");
 
-//  Firebase Initialization
+// --- Firebase Initialization ---
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
+  apiKey: "AIzaSyCg0IFol4ceyqbZ8UV3UXW04upZkKovK00",
+  authDomain: "tictactoev1rp.firebaseapp.com",
+  projectId: "tictactoev1rp",
+  storageBucket: "tictactoev1rp.firebasestorage.app",
+  messagingSenderId: "91921003930",
+  appId: "1:91921003930:web:ddddf314e7417dcf417623",
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-//  Game State Variables
-let currentUserId = null;
+// --- Game State Variables ---
+let currentUserId = null; // This will now be the Firebase Auth UID
 let currentUsername = null;
 let firebaseUser = null;
 let currentGameId = null;
@@ -74,19 +76,16 @@ const Winning_Combinations = [
   [2, 4, 6],
 ];
 
-//  Core App Functions
+// --- Core App Functions ---
 const showScreen = (screenName) => {
   Object.values(screens).forEach((s) => s.classList.add("hidden"));
   screens[screenName].classList.remove("hidden");
 };
 
-// This function now ONLY handles setting the initial UI state.
+// --- App Initialization and Auth Flow ---
 function initializeAppUI() {
-  const storedUserId = localStorage.getItem("ticTacToeUserId");
   const storedUserName = localStorage.getItem("ticTacToeUserName");
-
-  if (storedUserId && storedUserName) {
-    currentUserId = storedUserId;
+  if (storedUserName) {
     currentUsername = storedUserName;
     playerNameDisplay.textContent = currentUsername;
     showScreen("lounge");
@@ -95,13 +94,37 @@ function initializeAppUI() {
   }
 }
 
-//  Event Listeners
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    firebaseUser = user;
+    currentUserId = user.uid; // Use the official Firebase UID
+
+    const storedUserName = localStorage.getItem("ticTacToeUserName");
+    if (storedUserName) {
+      currentUsername = storedUserName;
+      playerNameDisplay.textContent = currentUsername;
+      showScreen("lounge");
+      listenForLeaderboard();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameIdFromUrl = urlParams.get("gId");
+      if (gameIdFromUrl) await joinGame(gameIdFromUrl);
+    } else {
+      showScreen("auth");
+    }
+  } else {
+    firebaseUser = null;
+    currentUserId = null;
+    if (unsubscribeFromLeaderboard) unsubscribeFromLeaderboard();
+  }
+});
+
 loginBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
-  if (!name) {
-    alert("Please enter a name!");
-    return;
-  }
+  if (!name) return alert("Please enter a name!");
+  if (!currentUserId)
+    return alert("Still authenticating... please wait a moment.");
+
   const statsRef = collection(db, "playerStats");
   const q = query(statsRef, where("name", "==", name));
   const querySnapshot = await getDocs(q);
@@ -110,10 +133,10 @@ loginBtn.addEventListener("click", async () => {
     nameTakenModal.classList.add("flex");
     return;
   }
+
   currentUsername = name;
-  currentUserId = crypto.randomUUID();
-  localStorage.setItem("ticTacToeUserId", currentUserId);
   localStorage.setItem("ticTacToeUserName", currentUsername);
+
   const userStatsRef = doc(db, "playerStats", currentUserId);
   await setDoc(userStatsRef, {
     name: currentUsername,
@@ -121,14 +144,14 @@ loginBtn.addEventListener("click", async () => {
     losses: 0,
     draws: 0,
   });
+
   playerNameDisplay.textContent = currentUsername;
   showScreen("lounge");
   listenForLeaderboard();
+
   const urlParams = new URLSearchParams(window.location.search);
   const gameIdFromUrl = urlParams.get("gId");
-  if (gameIdFromUrl) {
-    await joinGame(gameIdFromUrl);
-  }
+  if (gameIdFromUrl) await joinGame(gameIdFromUrl);
 });
 
 closeModalBtn.addEventListener("click", () => {
@@ -136,30 +159,7 @@ closeModalBtn.addEventListener("click", () => {
   nameTakenModal.classList.remove("flex");
 });
 
-// This is now the single source of truth for app readiness.
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    firebaseUser = user;
-    // We have a firebase session. Now, do we have a persistent local identity?
-    if (currentUserId) {
-      // Yes. We are a returning user. Attach listeners and handle URL joins.
-      listenForLeaderboard();
-      const urlParams = new URLSearchParams(window.location.search);
-      const gameIdFromUrl = urlParams.get("gId");
-      if (gameIdFromUrl) {
-        await joinGame(gameIdFromUrl);
-      }
-    }
-    // If currentUserId is null, we are a new user. The loginBtn handler
-    // is responsible for calling listenForLeaderboard() after they sign up.
-  } else {
-    // User is signed out.
-    firebaseUser = null;
-    if (unsubscribeFromLeaderboard) unsubscribeFromLeaderboard();
-  }
-});
-
-//  Game Creation and Joining
+// --- Game Creation and Joining ---
 createGameBtn.addEventListener("click", async () => {
   if (!currentUserId) return;
   const gameRef = await addDoc(collection(db, "games"), {
@@ -174,27 +174,21 @@ createGameBtn.addEventListener("click", async () => {
   await joinGame(gameRef.id);
 });
 
-// TODO: URL searchParams
 joinGameBtn.addEventListener("click", () => {
   const input = joinGameInput.value.trim();
   let gameId = input;
   if (input.includes("?gId=")) {
     try {
       gameId = new URL(input).searchParams.get("gId");
-    } catch (error) {
-      console.error("Invalid URL pasted");
-      alert("The URL you pasted is not valid.");
-      return;
+    } catch (e) {
+      return alert("The URL you pasted is not valid.");
     }
   }
   if (gameId) joinGame(gameId);
 });
 
 async function joinGame(gameId) {
-  if (!currentUserId) {
-    alert("You need to be logged in to join a game!");
-    return;
-  }
+  if (!currentUserId) return alert("You need to be logged in to join a game!");
   const gameRef = doc(db, "games", gameId);
   try {
     await runTransaction(db, async (transaction) => {
@@ -219,12 +213,10 @@ async function joinGame(gameId) {
     });
     subscribeToGame(gameId);
   } catch (error) {
-    console.error("Error joining game:", error);
     alert(error);
   }
 }
 
-//  Real-time Game Rendering
 function createBoard() {
   boardElement.innerHTML = "";
   for (let i = 0; i < 9; i++) {
@@ -252,25 +244,21 @@ function subscribeToGame(gameId) {
 }
 
 function renderGame(gameData) {
-  const cells = boardElement.querySelectorAll(".cell");
   gameData.board.forEach((mark, i) => {
-    cells[i].classList.remove("x", "circle");
-    if (mark) cells[i].classList.add(mark === "X" ? "x" : "circle");
+    const cell = boardElement.children[i];
+    cell.classList.remove("x", "circle");
+    if (mark) cell.classList.add(mark === "X" ? "x" : "circle");
   });
 
-  const playerXData = Object.values(gameData.players).find(
-    (p) => p.symbol === "X"
-  );
-  const playerOData = Object.values(gameData.players).find(
-    (p) => p.symbol === "O"
-  );
+  const pX = Object.values(gameData.players).find((p) => p.symbol === "X");
+  const pO = Object.values(gameData.players).find((p) => p.symbol === "O");
   playerXInfo.querySelector(
     "p.font-bold"
   ).innerHTML = `<span class="text-2xl" style="color: #00d4ff;">X</span> ${
-    playerXData ? playerXData.name : "Waiting..."
+    pX ? pX.name : "..."
   }`;
   playerOInfo.querySelector("p.font-bold").innerHTML = `${
-    playerOData ? playerOData.name : "Waiting..."
+    pO ? pO.name : "..."
   } <span class="text-2xl" style="color: #ff4d94;">O</span>`;
   playerXInfo.dataset.playerId =
     Object.keys(gameData.players).find(
@@ -280,19 +268,18 @@ function renderGame(gameData) {
     Object.keys(gameData.players).find(
       (id) => gameData.players[id].symbol === "O"
     ) || "";
+
   playerXInfo.classList.remove("player-active");
   playerOInfo.classList.remove("player-active");
-  playerXInfo.style.setProperty("--active-color", "transparent");
-  playerOInfo.style.setProperty("--active-color", "transparent");
 
   if (gameData.status === "playing") {
-    if (gameData.currentPlayer === "X") {
-      playerXInfo.classList.add("player-active");
-      playerXInfo.style.setProperty("--active-color", "#00d4ff");
-    } else {
-      playerOInfo.classList.add("player-active");
-      playerOInfo.style.setProperty("--active-color", "#ff4d94");
-    }
+    const activeInfo =
+      gameData.currentPlayer === "X" ? playerXInfo : playerOInfo;
+    activeInfo.classList.add("player-active");
+    activeInfo.style.setProperty(
+      "--active-color",
+      gameData.currentPlayer === "X" ? "#00d4ff" : "#ff4d94"
+    );
   }
 
   if (!gameData.players[currentUserId]) return;
@@ -301,20 +288,8 @@ function renderGame(gameData) {
 
   if (gameData.status === "playing") {
     winningMessage.classList.add("hidden");
-    const currentPlayerName =
-      gameData.currentPlayer === "X"
-        ? playerXData.name
-        : playerOData
-        ? playerOData.name
-        : "";
-    turnIndicator.textContent = isMyTurn
-      ? "Your turn!"
-      : `${currentPlayerName}'s turn`;
-    turnIndicator.style.color = isMyTurn
-      ? mySymbol === "X"
-        ? "#00d4ff"
-        : "#ff4d94"
-      : "#f0f0f0";
+    const cName = gameData.currentPlayer === "X" ? pX.name : pO ? pO.name : "";
+    turnIndicator.textContent = isMyTurn ? "Your turn!" : `${cName}'s turn`;
   } else if (gameData.status === "finished") {
     winningMessage.classList.remove("hidden");
     winningMessage.classList.add("flex");
@@ -327,7 +302,6 @@ function renderGame(gameData) {
     if (mySymbol === "X") updatePlayerStats(gameData);
   } else if (gameData.status === "waiting") {
     turnIndicator.textContent = "Waiting for an opponent...";
-    turnIndicator.style.color = "#f0f0f0";
   }
 }
 
@@ -339,7 +313,7 @@ function subscribeToPlayerStats(gameData) {
     const unsub = onSnapshot(playerRef, (doc) => {
       const data = doc.data();
       if (data) {
-        const statsText = `W:${data.wins} / L:${data.losses} / D:${data.draws}`;
+        const statsText = `W:${data.wins} L:${data.losses} D:${data.draws}`;
         if (playerXInfo.dataset.playerId === id)
           playerXInfo.querySelector(".player-stats").textContent = statsText;
         else if (playerOInfo.dataset.playerId === id)
@@ -350,7 +324,6 @@ function subscribeToPlayerStats(gameData) {
   });
 }
 
-//  Gameplay Actions
 async function handleCellClick(e) {
   const index = parseInt(e.target.dataset.index);
   if (!currentGameId || !currentUserId) return;
@@ -360,21 +333,23 @@ async function handleCellClick(e) {
       const gameSnap = await transaction.get(gameRef);
       if (!gameSnap.exists()) throw "Game does not exist!";
       const gameData = gameSnap.data();
-      const playerSymbol = gameData.players[currentUserId]?.symbol;
+      const pSym = gameData.players[currentUserId]?.symbol;
       if (
         gameData.status === "playing" &&
-        gameData.currentPlayer === playerSymbol &&
+        gameData.currentPlayer === pSym &&
         !gameData.board[index]
       ) {
-        const newBoard = [...gameData.board];
-        newBoard[index] = playerSymbol;
-        const win = checkWin(newBoard, playerSymbol);
-        const draw = !win && newBoard.every((cell) => cell !== null);
+        const nBoard = [...gameData.board];
+        nBoard[index] = pSym;
+        const win = Winning_Combinations.some((c) =>
+          c.every((i) => nBoard[i] === pSym)
+        );
+        const draw = !win && nBoard.every((cell) => cell !== null);
         transaction.update(gameRef, {
-          board: newBoard,
-          currentPlayer: playerSymbol === "X" ? "O" : "X",
+          board: nBoard,
+          currentPlayer: pSym === "X" ? "O" : "X",
           status: win || draw ? "finished" : "playing",
-          winner: win ? playerSymbol : null,
+          winner: win ? pSym : null,
         });
       }
     });
@@ -383,14 +358,9 @@ async function handleCellClick(e) {
   }
 }
 
-function checkWin(board, c) {
-  return Winning_Combinations.some((comb) => comb.every((i) => board[i] === c));
-}
-
 restartBtn.addEventListener("click", async () => {
   if (!currentGameId) return;
-  const gameRef = doc(db, "games", currentGameId);
-  await updateDoc(gameRef, {
+  await updateDoc(doc(db, "games", currentGameId), {
     board: Array(9).fill(null),
     currentPlayer: "X",
     status: "playing",
@@ -402,10 +372,8 @@ restartBtn.addEventListener("click", async () => {
 leaveGameBtn.addEventListener("click", () => {
   if (unsubscribeFromGame) unsubscribeFromGame();
   playerStatUnsubscribes.forEach((unsub) => unsub());
-  playerStatUnsubscribes = [];
   currentGameId = null;
   showScreen("lounge");
-  // UX FIX: Clean the URL to remove the game ID query parameter
   window.history.pushState({}, document.title, window.location.pathname);
 });
 
@@ -418,20 +386,17 @@ shareInviteBtn.addEventListener("click", async () => {
   };
   try {
     if (navigator.share) {
-      await navigator.clipboard.writeText(shareUrl);
       await navigator.share(shareData);
-      shareFeedback.textContent = "Invite sent & URL copied!";
+      shareFeedback.textContent = "Invite sent!";
     } else {
       await navigator.clipboard.writeText(shareUrl);
       shareFeedback.textContent = "Invite URL copied!";
     }
   } catch (err) {
-    console.error("Share failed:", err);
     try {
       await navigator.clipboard.writeText(shareUrl);
-      shareFeedback.textContent = "Sharing failed, URL copied instead!";
+      shareFeedback.textContent = "Sharing failed, URL copied!";
     } catch (copyErr) {
-      console.error("Copy failed:", copyErr);
       shareFeedback.textContent = "Could not copy URL.";
       shareFeedback.classList.replace("text-green-400", "text-red-400");
     }
@@ -443,35 +408,31 @@ shareInviteBtn.addEventListener("click", async () => {
   }, 3000);
 });
 
-//  Leaderboard and Stats Update Logic
 async function updatePlayerStats(gameData) {
   if (gameData.statsProcessed) return;
-  const winnerSymbol = gameData.winner;
-  const winnerId = Object.keys(gameData.players).find(
-    (key) => gameData.players[key].symbol === winnerSymbol
+  const wSym = gameData.winner;
+  const wId = Object.keys(gameData.players).find(
+    (key) => gameData.players[key].symbol === wSym
   );
-  const isDraw = !winnerSymbol;
-  for (const playerId of gameData.playerIds) {
-    const playerRef = doc(db, "playerStats", playerId);
+  const isDraw = !wSym;
+  for (const pId of gameData.playerIds) {
+    const pRef = doc(db, "playerStats", pId);
     try {
       await runTransaction(db, async (transaction) => {
-        const playerDoc = await transaction.get(playerRef);
-        const data = playerDoc.data() || {};
+        const pDoc = await transaction.get(pRef);
+        const data = pDoc.data() || {};
         let { wins = 0, losses = 0, draws = 0 } = data;
         if (isDraw) draws++;
-        else if (playerId === winnerId) wins++;
+        else if (pId === wId) wins++;
         else losses++;
         transaction.set(
-          playerRef,
+          pRef,
           { ...data, wins, losses, draws },
           { merge: true }
         );
       });
     } catch (e) {
-      console.error(
-        `Stat update transaction for player ${playerId} failed:`,
-        e
-      );
+      console.error(`Stat update for player ${pId} failed:`, e);
     }
   }
   await updateDoc(doc(db, "games", currentGameId), { statsProcessed: true });
@@ -482,7 +443,7 @@ function listenForLeaderboard() {
   const q = query(
     collection(db, "playerStats"),
     orderBy("wins", "desc"),
-    limit(100)
+    limit(10)
   );
   unsubscribeFromLeaderboard = onSnapshot(q, (snapshot) => {
     leaderboardList.innerHTML = "";
@@ -496,20 +457,20 @@ function listenForLeaderboard() {
       const data = doc.data();
       const li = document.createElement("li");
       li.className =
-        "flex items-center justify-between p-2 rounded-lg bg-black/20";
+        "grid grid-cols-[auto_1fr_auto] items-center gap-4 p-3 rounded-2xl bg-black/20";
       li.innerHTML = `
-            <div class="flex items-center gap-3">
-                <span class="font-bold text-lg w-6 text-center">${rank}.</span>
-                <span class="font-semibold">${data.name || "Anonymous"}</span>
-            </div>
-            <div class="flex items-center gap-4 text-sm">
-                <span class="font-bold text-green-400" title="Wins"><i class="fa-solid fa-crown"></i> ${
+            <span class="font-bold text-xl w-8 text-center text-gray-400">${rank}</span>
+            <span class="font-semibold text-white truncate" title="${
+              data.name || "Anonymous"
+            }">${data.name || "Anonymous"}</span>
+            <div class="flex items-center justify-end gap-3 sm:gap-4 text-xs sm:text-sm font-mono">
+                <span class="flex items-center gap-1.5 text-green-400" title="Wins"><i class="fa-solid fa-crown"></i> ${
                   data.wins || 0
                 }</span>
-                <span class="font-bold text-red-400" title="Losses"><i class="fa-solid fa-shield-halved"></i> ${
+                <span class="flex items-center gap-1.5 text-red-400" title="Losses"><i class="fa-solid fa-shield-halved"></i> ${
                   data.losses || 0
                 }</span>
-                <span class="font-bold text-gray-400" title="Draws"><i class="fa-solid fa-handshake"></i> ${
+                <span class="flex items-center gap-1.5 text-gray-400" title="Draws"><i class="fa-solid fa-handshake"></i> ${
                   data.draws || 0
                 }</span>
             </div>`;
@@ -519,8 +480,20 @@ function listenForLeaderboard() {
   });
 }
 
-//  Initialize the App
-// 1. Set up the initial UI based on what's in localStorage
+// --- Initialize the App ---
 initializeAppUI();
-// 2. Ensure we have a Firebase session. onAuthStateChanged will handle the rest.
 signInAnonymously(auth);
+
+// PWA Service Worker Registration
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker
+//       .register("/sw.js")
+//       .then((registration) => {
+//         console.log("SW registered: ", registration);
+//       })
+//       .catch((registrationError) => {
+//         console.log("SW registration failed: ", registrationError);
+//       });
+//   });
+// }

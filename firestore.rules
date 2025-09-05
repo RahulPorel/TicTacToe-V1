@@ -2,32 +2,22 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- PLAYER STATS COLLECTION ---
-    // Anyone can read the player stats for the leaderboard.
+    // A user's stats document ID must match their authentication ID.
     match /playerStats/{userId} {
       allow read: if true;
-      
-      // A user can only CREATE their own stats document.
-      allow create: if request.auth != null && request.auth.uid != null;
-      
-      // A user can only UPDATE their own stats, and can only change their name.
-      // Game stats (wins/losses/draws) are updated via transactions managed by game logic.
-      allow update: if request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Allow name updates by the owner, and stat updates within game logic (via transaction)
+      allow update: if request.auth != null && request.auth.uid == userId;
     }
 
-    // --- GAMES COLLECTION ---
     match /games/{gameId} {
-      // Anyone can read a game document.
       allow read: if true;
 
-      // An authenticated user can CREATE a new game document.
-      // We validate that the initial state is correct.
+      // The person creating the game must be authenticated and listed as player 1.
       allow create: if request.auth != null &&
-                      request.resource.data.playerIds[0] == request.auth.uid &&
-                      request.resource.data.players[request.auth.uid].symbol == 'X' &&
-                      request.resource.data.status == 'waiting';
+                      request.resource.data.playerIds[0] == request.auth.uid;
 
-      // A user can UPDATE a game (join or make a move) if they are a player in that game.
+      // A user can only update a game if they are one of the players in that game.
       allow update: if request.auth != null &&
                       request.auth.uid in resource.data.playerIds;
     }
