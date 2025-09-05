@@ -51,26 +51,64 @@
     <!-- Game Lobby -->
     <div
       id="game-lounge"
-      class="screen hidden w-full max-w-3xl p-6 sm:p-8 glass-card"
+      class="screen hidden w-full max-w-4xl p-6 sm:p-8 glass-card"
     >
       <div class="flex flex-col md:flex-row gap-8">
-        <!-- Left Panel: Create/Join Game -->
-        <div class="flex-1">
-          <h2
-            class="text-2xl sm:text-3xl font-bold mb-6 font-pixel text-center"
-          >
-            Game Lobby
-          </h2>
-          <div class="bg-black/20 p-4 rounded-2xl mb-6 text-center">
-            <p class="text-sm text-gray-400">Welcome</p>
-            <p id="player-name-display" class="text-lg font-bold truncate"></p>
+        
+
+
+    <!-- Left Panel: Create/Join Game -->
+    <div class="flex-1 flex flex-col space-y-6">
+
+
+      <div class="flex items-center justify-center">
+        <img 
+          src="/public/logo.png" 
+          alt="Game Logo" 
+          class="w-8 h-8 mr-4"
+        
+        />
+        <h2
+          class="text-3xl sm:text-4xl font-bold font-pixel"
+        >
+          Tic Tac Toe
+        </h2>
+      </div>
+
+
+  
+      <div class="bg-black/20 p-4 rounded-2xl text-center">
+        <p class="text-sm text-gray-400">Welcome</p>
+        <p id="player-name-display" class="text-lg font-bold truncate"></p>
+      </div>
+
+      <!-- Path 1: Create a Game -->
+      <div class="space-y-3 text-center">
+          <div class="text-left">
+              <p class="font-semibold text-lg">Start a New Match</p>
+              <p class="text-sm text-gray-400">Challenge a friend and claim victory.</p>
           </div>
           <button
             id="create-game-btn"
-            class="btn btn-primary w-full text-white py-3 px-6 text-lg mb-4"
+            class="btn btn-primary cursor-pointer w-full text-white py-3 px-6 text-lg"
           >
             <i class="fa-solid fa-plus mr-2"></i> Create New Game
           </button>
+      </div>
+      
+      <!-- Divider -->
+      <div class="relative flex items-center">
+        <div class="flex-grow border-t border-gray-600"></div>
+        <span class="flex-shrink mx-4 text-gray-400 text-sm">OR</span>
+        <div class="flex-grow border-t border-gray-600"></div>
+      </div>
+
+      <!-- Path 2: Join a Game -->
+      <div class="space-y-3">
+          <div class="text-left">
+              <p class="font-semibold text-lg">Join an Existing Match</p>
+              <p class="text-sm text-gray-400">Have an invite link or Game ID?</p>
+          </div>
           <div class="flex items-center gap-2">
             <input
               id="join-game-input"
@@ -80,22 +118,43 @@
             />
             <button
               id="join-game-btn"
-              class="btn bg-green-500 hover:bg-green-600 text-white p-3 h-[50px] w-[50px] flex-shrink-0"
+              class="btn bg-green-500 cursor-pointer hover:bg-green-600 text-white p-3 h-[50px] w-[50px] flex-shrink-0"
             >
               <i class="fa-solid fa-right-to-bracket"></i>
             </button>
           </div>
-        </div>
+      </div>
+    </div>
+
+
+
+
+
         <!-- Right Panel: Leaderboard -->
-        <div class="flex-1">
+        <div class="flex-1 flex flex-col h-5/6 no-scrollbar"> 
           <h3
-            class="text-2xl sm:text-3xl font-bold mb-6 font-pixel text-center"
+            class="text-2xl sm:text-3xl font-bold mb-4 font-pixel text-center"
           >
             <i class="fa-solid fa-trophy text-yellow-400"></i> Leaderboard
           </h3>
-          <ol id="leaderboard" class="space-y-3"></ol>
+
+          <!-- Professional Table Header -->
+          <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 pb-3 border-b border-white/10 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+            <span>#</span>
+            <span class="truncate">Player</span>
+            <span class="text-left">W / L / D</span>
+          </div>
+
+          <!-- Scrollable Body for the List -->
+          <div class="flex-grow overflow-y-auto no-scrollbar pr-2">
+             <ol id="leaderboard" class="space-y-3 mt-3"></ol>
+          </div>
         </div>
       </div>
+    </div>
+      </div>
+
+
     </div>
 
     <!-- Game Screen -->
@@ -103,10 +162,10 @@
       id="game-screen"
       class="screen hidden w-full max-w-lg flex-col items-center p-2 sm:p-4"
     >
-      <div class="w-full max-w-md mb-6 flex justify-between items-center px-2">
+      <div class="sm:w-full max-w-md mb-8 flex justify-between items-center px-2">
         <button
           id="leave-game-btn"
-          class="btn bg-red-500/50 hover:bg-red-500/80 text-white py-2 px-4 text-sm"
+          class="btn bg-red-500/50 hover:bg-red-500/80 text-white py-2 cursor-pointer px-4 text-sm"
         >
           <i class="fa-solid fa-arrow-left"></i>
           <span class="hidden sm:inline ml-2">Leave</span>
@@ -114,7 +173,7 @@
         <div class="relative">
           <button
             id="share-invite-btn"
-            class="flex items-center gap-2 sm:gap-3 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 font-semibold rounded-full py-2 px-4 sm:px-5 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 shadow-lg"
+            class="flex items-center gap-2 sm:gap-3 bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 font-semibold rounded-full py-2 px-4 sm:px-5 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer focus:ring-opacity-75 shadow-lg"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -143,7 +202,7 @@
       </div>
 
       <div
-        class="flex justify-between w-full max-w-md mb-4 mt-4 p-2 glass-card rounded-2xl"
+        class="flex justify-between self-center w-full px-4 max-w-md mb-4 mt-4 p-2 glass-card rounded-2xl"
       >
         <div
           id="player-x-info"
@@ -172,7 +231,7 @@
       </div>
       <p
         id="turn-indicator"
-        class="text-xl text-center sm:text-2xl font-bold mb-5 h-8"
+        class="text-xl text-center sm:text-2xl font-bold my-8 h-8"
       ></p>
       <div class="board" id="board"></div>
 
@@ -188,7 +247,7 @@
         ></div>
         <button
           id="restartBtn"
-          class="btn btn-primary text-white py-3 sm:py-4 px-10 sm:px-12 text-xl sm:text-2xl font-pixel"
+          class="btn btn-primary cursor-pointer text-white py-3 sm:py-4 px-10 sm:px-12 text-xl sm:text-2xl font-pixel"
         >
           Play Again
         </button>
@@ -207,7 +266,10 @@
         <p class="mb-6 text-gray-300">
           That name is already in use. Please choose another one.
         </p>
-        <button id="close-modal-btn" class="btn btn-primary py-2 px-8">
+        <button
+          id="close-modal-btn"
+          class="btn btn-primary cursor-pointer py-2 px-8"
+        >
           OK
         </button>
       </div>

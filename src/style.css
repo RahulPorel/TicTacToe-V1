@@ -3,13 +3,14 @@
 :root {
   /* RESPONSIVE FIX: Use modern CSS for a truly fluid board size.
      It takes up 26% of the viewport width, but won't exceed 140px. */
-  --cell-size: min(26vw, 140px);
+  --cell-size: min(26vw, 180px);
   --gap-size: min(3vw, 10px);
 }
 
 body {
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c3e 100%);
+  /* background: linear-gradient(135deg, #1a1a1a 0%, #2c2c3e 100%); */
+  background: black;
   color: #f0f0f0;
   overflow-x: hidden;
 }
@@ -41,24 +42,50 @@ body {
   display: grid;
   grid-template-columns: repeat(3, var(--cell-size));
   grid-template-rows: repeat(3, var(--cell-size));
-  gap: var(--gap-size);
+  /* gap: var(--gap-size); */
   justify-content: center !important;
 }
 
 .cell {
-  background-color: rgba(26, 26, 26, 0.7);
-  border-radius: 16px;
+  /* background-color: rgba(26, 26, 26, 0.7); */
+  /* border-radius: 16px; */
+  border: 1px solid #cccccc;
+
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: grab;
+  /* transition: background-color 0.3s ease, transform 0.2s ease; */
 }
 
 .cell:hover {
-  background-color: rgba(58, 58, 58, 0.7);
-  transform: scale(1.05);
+  background-color: rgba(32, 32, 32, 0.7);
+}
+
+.cell:first-child,
+.cell:nth-child(2),
+.cell:nth-child(3) {
+  border-top: none;
+}
+
+.cell:nth-child(3n + 1) {
+  border-left: none;
+}
+
+.cell:nth-child(3n + 3) {
+  border-right: none;
+}
+
+.cell:last-child,
+.cell:nth-child(8),
+.cell:nth-child(7) {
+  border-bottom: none;
+}
+
+.cell.x,
+.cell.circle {
+  cursor: not-allowed;
 }
 
 .cell.x::before,
