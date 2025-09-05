@@ -82,6 +82,40 @@ const showScreen = (screenName) => {
   screens[screenName].classList.remove("hidden");
 };
 
+async function displayInviteMessage() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameIdFromUrl = urlParams.get("gId");
+  const inviteMessageEl = document.getElementById("invite-message");
+  const hostNameEl = document.getElementById("host-name");
+  const authPromptEl = document.getElementById("auth-prompt-message");
+
+  if (gameIdFromUrl && inviteMessageEl) {
+    try {
+      // Perform a quick, anonymous read of the game document
+      const gameRef = doc(db, "games", gameIdFromUrl);
+      const gameSnap = await getDoc(gameRef);
+
+      if (gameSnap.exists()) {
+        const gameData = gameSnap.data();
+        // Find the host (Player X)
+        const hostId = Object.keys(gameData.players).find(
+          (id) => gameData.players[id].symbol === "X"
+        );
+        if (hostId) {
+          const hostName = gameData.players[hostId].name;
+          hostNameEl.textContent = hostName;
+          inviteMessageEl.classList.remove("hidden");
+          // Hide the generic prompt for a more tailored message
+          authPromptEl.classList.add("hidden");
+        }
+      }
+    } catch (error) {
+      console.error("Could not fetch invite details:", error);
+      // Fail silently if gId is invalid or a network error occurs
+    }
+  }
+}
+
 // --- App Initialization and Auth Flow ---
 function initializeAppUI() {
   const storedUserName = localStorage.getItem("ticTacToeUserName");
@@ -111,6 +145,7 @@ onAuthStateChanged(auth, async (user) => {
       if (gameIdFromUrl) await joinGame(gameIdFromUrl);
     } else {
       showScreen("auth");
+      await displayInviteMessage(); // Check for and show the invite message
     }
   } else {
     firebaseUser = null;

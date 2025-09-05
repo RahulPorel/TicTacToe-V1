@@ -124,11 +124,15 @@ body {
   box-shadow: 0 0 25px rgba(255, 77, 148, 0.5);
 }
 
+.btn-secondary {
+  background: #00d4ff;
+}
+
 .btn-primary {
-  background: linear-gradient(45deg, #06d5ff, #ff4d94);
+  background: #ff4d94;
 }
 .btn-primary:hover {
-  box-shadow: 0 0 25px rgba(255, 77, 148, 0.7);
+  box-shadow: 0 0 10px rgba(255, 77, 148, 0.7);
 }
 
 .input-field {

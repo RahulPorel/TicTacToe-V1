@@ -6,20 +6,26 @@ service cloud.firestore {
     match /playerStats/{userId} {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid == userId;
-      // Allow name updates by the owner, and stat updates within game logic (via transaction)
       allow update: if request.auth != null && request.auth.uid == userId;
     }
 
     match /games/{gameId} {
+      // Allow anyone to read game data (needed for the invite message feature).
       allow read: if true;
 
       // The person creating the game must be authenticated and listed as player 1.
       allow create: if request.auth != null &&
                       request.resource.data.playerIds[0] == request.auth.uid;
 
-      // A user can only update a game if they are one of the players in that game.
+
+      // Allow an update if a user is joining an open game OR is already a player.
       allow update: if request.auth != null &&
-                      request.auth.uid in resource.data.playerIds;
+                      (
+                        // Condition 1: Joining an open game that you are not already in.
+                        (resource.data.playerIds.size() == 1 && !(request.auth.uid in resource.data.playerIds)) ||
+                        // Condition 2: You are already a player in the game (for making moves).
+                        (request.auth.uid in resource.data.playerIds)
+                      );
     }
   }
 }

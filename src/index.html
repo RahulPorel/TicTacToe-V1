@@ -3,10 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tic Tac Toe</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Tic Tac Toe | Multiplayer Game</title>
+    <meta
+      name="description"
+      content="Play Tic Tac Toe online with friends in real-time. Create or join matches instantly, track wins and losses, and enjoy a fun retro game experience."
+    />
+
+    <meta name="theme-color" content="#000000" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./assets/site.webmanifest" />
+
+    <!-- App Icons -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./assets/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="./assets/favicon-16x16.png"
+    />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
@@ -19,31 +45,87 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+
+    <!-- open graph meta tags for better SEO and social sharing -->
+    <meta property="og:title" content="Play Tic Tac Toe Online" />
+    <meta
+      property="og:description"
+      content="Challenge your friends in a fun, real-time Tic Tac Toe game. Free and multiplayer-ready."
+    />
+    <meta property="og:image" content="./assets/logo.png" />
+    <meta property="og:url" content="https://tictactoe.rahulporel.com/" />
+    <meta property="og:type" content="website" />
+
+    <!-- twitter meta tags for Twitter cards -->
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Play Tic Tac Toe Online" />
+    <meta
+      name="twitter:description"
+      content="Free multiplayer Tic Tac Toe — start a match instantly!"
+    />
+    <meta name="twitter:image" content="./assets/logo.png" />
+    <link rel="preload" href="./style.css" as="style" />
+    <link rel="preload" href="./app.js" as="script" />
     <link rel="stylesheet" href="style.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Game",
+        "name": "Tic Tac Toe",
+        "applicationCategory": "Game",
+        "operatingSystem": "Web",
+        "inLanguage": "en",
+        "url": "https://yourdomain.com/tictactoe/",
+        "image": "https://yourdomain.com/assets/icon-512.png",
+        "author": {
+          "@type": "Person",
+          "name": "Rahul Porel"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "CRM-Aid"
+        }
+      }
+    </script>
   </head>
   <body class="flex items-center justify-center min-h-screen p-4 sm:p-6">
     <!-- Auth Screen -->
     <div
       id="auth-screen"
-      class="screen w-full max-w-md text-center p-6 sm:p-8 glass-card"
+      class="screen w-full max-w-2xl text-center p-6 sm:p-8 glass-card"
     >
+      <!-- invite message block. -->
+      <div
+        id="invite-message"
+        class="hidden mb-6 bg-indigo-500/20 border border-indigo-500/30 rounded-2xl p-4 text-center transition-all duration-300 ease-in-out"
+      >
+        <p class="text-indigo-300 text-lg">
+          <span id="host-name" class="font-bold font-pixel"></span> has thrown
+          the gauntlet!
+        </p>
+        <p class="text-gray-400 text-sm mt-1">
+          Enter your name to accept the challenge.
+        </p>
+      </div>
       <h1
         class="text-4xl sm:text-5xl font-bold mb-4 font-pixel text-white text-center"
         style="text-shadow: 0 0 5px #06d5ff, 0 0 5px #ff4d94"
       >
-        Tic-Tac-Toe
+        Play Tic Tac Toe Online
       </h1>
       <p class="mb-8 text-gray-300">Enter a unique name to compete!</p>
       <input
         id="name-input"
         type="text"
-        placeholder="Your Name"
-        class="input-field w-full px-4 py-3 rounded-full text-white text-center outline-none mb-4"
+        placeholder="Enter Your Name"
+        class="input-field w-full px-4 py-3 rounded-full text-white text-center outline-none mb-8"
         maxlength="15"
       />
       <button
         id="login-btn"
-        class="btn btn-primary w-full sm:w-auto text-white py-3 px-12 text-lg sm:text-xl font-pixel"
+        class="btn btn-primary w-full sm:w-auto text-white py-3 px-12 text-lg sm:text-xl"
       >
         Enter the Lobby
       </button>
@@ -55,87 +137,75 @@
       class="screen hidden w-full max-w-4xl p-6 sm:p-8 glass-card"
     >
       <div class="flex flex-col md:flex-row gap-8">
-        
+        <!-- Left Panel: Create/Join Game -->
+        <div class="flex-1 flex flex-col space-y-6">
+          <div class="flex items-center justify-center">
+            <img src="assets/logo.png" alt="Game Logo" class="w-8 h-8 mr-4" />
+            <h2 class="text-3xl sm:text-4xl font-bold font-pixel">
+              Tic Tac Toe
+            </h2>
+          </div>
 
+          <div class="bg-black/20 p-4 rounded-2xl text-center">
+            <p class="text-sm text-gray-400">Welcome</p>
+            <p id="player-name-display" class="text-lg font-bold truncate"></p>
+          </div>
 
-    <!-- Left Panel: Create/Join Game -->
-    <div class="flex-1 flex flex-col space-y-6">
-
-
-      <div class="flex items-center justify-center">
-        <img 
-          src="/public/logo.png" 
-          alt="Game Logo" 
-          class="w-8 h-8 mr-4"
-        
-        />
-        <h2
-          class="text-3xl sm:text-4xl font-bold font-pixel"
-        >
-          Tic Tac Toe
-        </h2>
-      </div>
-
-
-  
-      <div class="bg-black/20 p-4 rounded-2xl text-center">
-        <p class="text-sm text-gray-400">Welcome</p>
-        <p id="player-name-display" class="text-lg font-bold truncate"></p>
-      </div>
-
-      <!-- Path 1: Create a Game -->
-      <div class="space-y-3 text-center">
-          <div class="text-left">
+          <!-- Path 1: Create a Game -->
+          <div class="space-y-3 text-center">
+            <div class="text-left">
               <p class="font-semibold text-lg">Start a New Match</p>
-              <p class="text-sm text-gray-400">Challenge a friend and claim victory.</p>
-          </div>
-          <button
-            id="create-game-btn"
-            class="btn btn-primary cursor-pointer w-full text-white py-3 px-6 text-lg"
-          >
-            <i class="fa-solid fa-plus mr-2"></i> Create New Game
-          </button>
-      </div>
-      
-      <!-- Divider -->
-      <div class="relative flex items-center">
-        <div class="flex-grow border-t border-gray-600"></div>
-        <span class="flex-shrink mx-4 text-gray-400 text-sm">OR</span>
-        <div class="flex-grow border-t border-gray-600"></div>
-      </div>
-
-      <!-- Path 2: Join a Game -->
-      <div class="space-y-3">
-          <div class="text-left">
-              <p class="font-semibold text-lg">Join an Existing Match</p>
-              <p class="text-sm text-gray-400">Have an invite link or Game ID?</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <input
-              id="join-game-input"
-              type="text"
-              placeholder="Paste Game ID or URL"
-              class="input-field w-full px-4 py-3 rounded-full text-white text-center outline-none"
-            />
+              <p class="text-sm text-gray-400">
+                Challenge a friend and claim victory.
+              </p>
+            </div>
             <button
-              id="join-game-btn"
-              class="btn bg-green-500 cursor-pointer hover:bg-green-600 text-white p-3 h-[50px] w-[50px] flex-shrink-0"
+              id="create-game-btn"
+              class="btn btn-primary cursor-pointer w-full text-white py-3 px-6 text-lg"
             >
-              <i class="fa-solid fa-right-to-bracket"></i>
+              <i class="fa-solid fa-plus mr-2"></i> Create New Game
             </button>
           </div>
-       
-            <p class="font-semibold text-lg text-center pt-2">By <a target="_blank" href="https://rahulporel.com/">Rahul Porel</a> </p>
-    
-      </div>
-    </div>
 
+          <!-- Divider -->
+          <div class="relative flex items-center">
+            <div class="flex-grow border-t border-gray-600"></div>
+            <span class="flex-shrink mx-4 text-gray-400 text-sm">OR</span>
+            <div class="flex-grow border-t border-gray-600"></div>
+          </div>
 
+          <!-- Path 2: Join a Game -->
+          <div class="space-y-3">
+            <div class="text-left">
+              <p class="font-semibold text-lg">Join an Existing Match</p>
+              <p class="text-sm text-gray-400">
+                Have an invite link or Game ID?
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                id="join-game-input"
+                type="text"
+                placeholder="Paste Game ID or URL"
+                class="input-field w-full px-4 py-3 rounded-full text-white text-center outline-none"
+              />
+              <button
+                id="join-game-btn"
+                class="btn bg-green-500 cursor-pointer hover:bg-green-600 text-white p-3 h-[50px] w-[50px] flex-shrink-0"
+              >
+                <i class="fa-solid fa-right-to-bracket"></i>
+              </button>
+            </div>
 
-
+            <p class="font-semibold text-lg text-center pt-2">
+              By
+              <a target="_blank" href="https://rahulporel.com/">Rahul Porel</a>
+            </p>
+          </div>
+        </div>
 
         <!-- Right Panel: Leaderboard -->
-        <div class="flex-1 flex flex-col h-[32rem]"> 
+        <div class="flex-1 flex flex-col h-[32rem]">
           <h3
             class="text-2xl sm:text-3xl font-bold mb-4 font-pixel text-center"
           >
@@ -143,7 +213,9 @@
           </h3>
 
           <!-- Professional Table Header -->
-          <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 pb-3 border-b border-white/10 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          <div
+            class="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 pb-3 border-b border-white/10 text-sm font-semibold text-gray-400 uppercase tracking-wider"
+          >
             <span>#</span>
             <span class="truncate">Player</span>
             <span class="text-left">W / L / D</span>
@@ -151,14 +223,10 @@
 
           <!-- Scrollable Body for the List -->
           <div class="flex-grow overflow-y-auto no-scrollbar pr-2">
-             <ol id="leaderboard" class="space-y-3 mt-3"></ol>
+            <ol id="leaderboard" class="space-y-3 mt-3"></ol>
           </div>
         </div>
       </div>
-    </div>
-      </div>
-
-
     </div>
 
     <!-- Game Screen -->
@@ -166,7 +234,9 @@
       id="game-screen"
       class="screen hidden w-full max-w-lg flex-col items-center p-2 sm:p-4"
     >
-      <div class="sm:w-full max-w-md mb-8 flex justify-between items-center px-2">
+      <div
+        class="sm:w-full max-w-md mb-8 flex justify-between items-center px-2"
+      >
         <button
           id="leave-game-btn"
           class="btn bg-red-500/50 hover:bg-red-500/80 text-white py-2 cursor-pointer px-4 text-sm"
