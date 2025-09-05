@@ -485,15 +485,16 @@ initializeAppUI();
 signInAnonymously(auth);
 
 // PWA Service Worker Registration
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker
-//       .register("/sw.js")
-//       .then((registration) => {
-//         console.log("SW registered: ", registration);
-//       })
-//       .catch((registrationError) => {
-//         console.log("SW registration failed: ", registrationError);
-//       });
-//   });
-// }
+// --- PWA Service Worker Registration ---
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register(new URL("/sw.js", import.meta.url))
+      .then((registration) => {
+        console.log("SW registered: ", registration);
+      })
+      .catch((registrationError) => {
+        console.log("SW registration failed: ", registrationError);
+      });
+  });
+}
