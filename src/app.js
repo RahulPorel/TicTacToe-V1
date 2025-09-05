@@ -15,8 +15,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-
-// --- DOM Elements ---
+ 
 const screens = {
   auth: document.getElementById("auth-screen"),
   lounge: document.getElementById("game-lounge"),
@@ -42,7 +41,7 @@ const leaveGameBtn = document.getElementById("leave-game-btn");
 const nameTakenModal = document.getElementById("name-taken-modal");
 const closeModalBtn = document.getElementById("close-modal-btn");
 
-// --- Firebase Initialization ---
+//  Firebase Initialization 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -55,7 +54,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Game State Variables ---
+//  Game State Variables 
 let currentUserId = null;
 let currentUsername = null;
 let firebaseUser = null;
@@ -75,7 +74,7 @@ const Winning_Combinations = [
   [2, 4, 6],
 ];
 
-// --- Core App Functions ---
+//  Core App Functions 
 const showScreen = (screenName) => {
   Object.values(screens).forEach((s) => s.classList.add("hidden"));
   screens[screenName].classList.remove("hidden");
@@ -96,7 +95,7 @@ function initializeAppUI() {
   }
 }
 
-// --- Event Listeners ---
+//  Event Listeners 
 loginBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
   if (!name) {
@@ -160,7 +159,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// --- Game Creation and Joining ---
+//  Game Creation and Joining 
 createGameBtn.addEventListener("click", async () => {
   if (!currentUserId) return;
   const gameRef = await addDoc(collection(db, "games"), {
@@ -224,7 +223,7 @@ async function joinGame(gameId) {
   }
 }
 
-// --- Real-time Game Rendering ---
+//  Real-time Game Rendering 
 function createBoard() {
   boardElement.innerHTML = "";
   for (let i = 0; i < 9; i++) {
@@ -350,7 +349,7 @@ function subscribeToPlayerStats(gameData) {
   });
 }
 
-// --- Gameplay Actions ---
+//  Gameplay Actions 
 async function handleCellClick(e) {
   const index = parseInt(e.target.dataset.index);
   if (!currentGameId || !currentUserId) return;
@@ -441,7 +440,7 @@ shareInviteBtn.addEventListener("click", async () => {
   }, 3000);
 });
 
-// --- Leaderboard and Stats Update Logic ---
+//  Leaderboard and Stats Update Logic 
 async function updatePlayerStats(gameData) {
   if (gameData.statsProcessed) return;
   const winnerSymbol = gameData.winner;
@@ -517,7 +516,7 @@ function listenForLeaderboard() {
   });
 }
 
-// --- Initialize the App ---
+//  Initialize the App 
 // 1. Set up the initial UI based on what's in localStorage
 initializeAppUI();
 // 2. Ensure we have a Firebase session. onAuthStateChanged will handle the rest.
