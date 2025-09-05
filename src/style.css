@@ -151,3 +151,7 @@ body {
     inset 0 0 10px var(--active-color, transparent);
   transform: scale(1.03);
 }
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

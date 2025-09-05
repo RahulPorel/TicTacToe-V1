@@ -482,7 +482,7 @@ function listenForLeaderboard() {
   const q = query(
     collection(db, "playerStats"),
     orderBy("wins", "desc"),
-    limit(10)
+    limit(100)
   );
   unsubscribeFromLeaderboard = onSnapshot(q, (snapshot) => {
     leaderboardList.innerHTML = "";
@@ -499,7 +499,7 @@ function listenForLeaderboard() {
         "flex items-center justify-between p-2 rounded-lg bg-black/20";
       li.innerHTML = `
             <div class="flex items-center gap-3">
-                <span class="font-bold text-lg w-6 text-center">${rank}</span>
+                <span class="font-bold text-lg w-6 text-center">${rank}.</span>
                 <span class="font-semibold">${data.name || "Anonymous"}</span>
             </div>
             <div class="flex items-center gap-4 text-sm">
