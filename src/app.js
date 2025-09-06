@@ -156,11 +156,12 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-loginBtn.addEventListener("click", async () => {
+async function handleLogin() {
   const name = nameInput.value.trim();
   if (!name) return NotifyX.error("Please enter a name!");
   if (!currentUserId)
     return NotifyX.error("Still authenticating... please wait a moment.");
+
   const statsRef = collection(db, "playerStats");
   const q = query(statsRef, where("name", "==", name));
   const querySnapshot = await getDocs(q);
@@ -188,6 +189,15 @@ loginBtn.addEventListener("click", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const gameIdFromUrl = urlParams.get("gId");
   if (gameIdFromUrl) await joinGame(gameIdFromUrl);
+}
+
+loginBtn.addEventListener("click", handleLogin);
+
+// Keyboard Enter listener
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    handleLogin();
+  }
 });
 
 closeModalBtn.addEventListener("click", () => {
