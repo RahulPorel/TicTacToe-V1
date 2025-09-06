@@ -518,18 +518,3 @@ function listenForLeaderboard() {
 // --- Initialize the App ---
 initializeAppUI();
 signInAnonymously(auth);
-
-// PWA Service Worker Registration
-// --- PWA Service Worker Registration ---
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register(new URL("/sw.js", import.meta.url))
-      .then((registration) => {
-        console.log("SW registered: ", registration.scope);
-      })
-      .catch((registrationError) => {
-        console.log("SW registration failed: ", registrationError);
-      });
-  });
-}
