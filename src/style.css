@@ -87,6 +87,11 @@ body {
   overflow-x: hidden;
 }
 
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 .font-pixel {
   font-family: "Pixelify Sans", sans-serif;
 }
@@ -227,7 +232,20 @@ body {
     inset 0 0 10px var(--active-color, transparent);
   transform: scale(1.03);
 }
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+
+.swal2-backdrop-show {
+  backdrop-filter: blur(8px) !important;
+}
+.leave-game-popup {
+  background: #15151d !important;
+  border-radius: 1rem !important;
+  color: #fff !important;
+}
+
+.leave-game-actions-container {
+  gap: 16px !important;
+}
+
+.leave-game-actions-container button {
+  border-radius: 22px !important;
 }

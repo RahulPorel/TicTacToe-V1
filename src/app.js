@@ -16,8 +16,11 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-
 import "./icons.js"; // Importing the icons module to set up FontAwesome icons
+import NotifyX from "notifyx";
+import "notifyx/dist/notifyx.min.css";
+import JSConfetti from "js-confetti";
+import Swal from "sweetalert2";
 
 const screens = {
   auth: document.getElementById("auth-screen"),
@@ -39,7 +42,6 @@ const leaderboardList = document.getElementById("leaderboard");
 const playerXInfo = document.getElementById("player-x-info");
 const playerOInfo = document.getElementById("player-o-info");
 const shareInviteBtn = document.getElementById("share-invite-btn");
-const shareFeedback = document.getElementById("share-feedback");
 const leaveGameBtn = document.getElementById("leave-game-btn");
 const nameTakenModal = document.getElementById("name-taken-modal");
 const closeModalBtn = document.getElementById("close-modal-btn");
@@ -156,10 +158,9 @@ onAuthStateChanged(auth, async (user) => {
 
 loginBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
-  if (!name) return alert("Please enter a name!");
+  if (!name) return NotifyX.error("Please enter a name!");
   if (!currentUserId)
-    return alert("Still authenticating... please wait a moment.");
-
+    return NotifyX.error("Still authenticating... please wait a moment.");
   const statsRef = collection(db, "playerStats");
   const q = query(statsRef, where("name", "==", name));
   const querySnapshot = await getDocs(q);
@@ -216,14 +217,15 @@ joinGameBtn.addEventListener("click", () => {
     try {
       gameId = new URL(input).searchParams.get("gId");
     } catch (e) {
-      return alert("The URL you pasted is not valid.");
+      return NotifyX.error("The URL you pasted is not valid.");
     }
   }
   if (gameId) joinGame(gameId);
 });
 
 async function joinGame(gameId) {
-  if (!currentUserId) return alert("You need to be logged in to join a game!");
+  if (!currentUserId)
+    return NotifyX.error("You need to be logged in to join a game!");
   const gameRef = doc(db, "games", gameId);
   try {
     await runTransaction(db, async (transaction) => {
@@ -320,6 +322,7 @@ function renderGame(gameData) {
   if (!gameData.players[currentUserId]) return;
   const mySymbol = gameData.players[currentUserId].symbol;
   const isMyTurn = gameData.currentPlayer === mySymbol;
+  const jsConfetti = new JSConfetti();
 
   if (gameData.status === "playing") {
     winningMessage.classList.add("hidden");
@@ -331,6 +334,7 @@ function renderGame(gameData) {
     if (gameData.winner) {
       winningMessageText.textContent =
         mySymbol === gameData.winner ? "You Win!" : "You Lose!";
+      if (mySymbol === gameData.winner) jsConfetti.addConfetti();
     } else {
       winningMessageText.textContent = "It's a Draw!";
     }
@@ -405,42 +409,56 @@ restartBtn.addEventListener("click", async () => {
 });
 
 leaveGameBtn.addEventListener("click", () => {
-  if (unsubscribeFromGame) unsubscribeFromGame();
-  playerStatUnsubscribes.forEach((unsub) => unsub());
-  currentGameId = null;
-  showScreen("lounge");
-  window.history.pushState({}, document.title, window.location.pathname);
+  Swal.fire({
+    title: "Leave Game?",
+    text: "This game session will be lost. Are you sure you want to exit?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, leave",
+    cancelButtonText: "No, stay",
+    customClass: {
+      popup: "leave-game-popup",
+      actions: "leave-game-actions-container",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // ✅ Your existing leave logic
+      if (unsubscribeFromGame) unsubscribeFromGame();
+      playerStatUnsubscribes.forEach((unsub) => unsub());
+      currentGameId = null;
+      showScreen("lounge");
+      window.history.pushState({}, document.title, window.location.pathname);
+
+      NotifyX.warning("You have left the game.");
+    }
+  });
 });
 
 shareInviteBtn.addEventListener("click", async () => {
   const shareUrl = `${window.location.origin}${window.location.pathname}?gId=${currentGameId}`;
   const shareData = {
-    title: "Tic-Tac-Toe Challenge!",
+    title: `Tic Tac Toe Challenge!`,
     text: `Come play Tic-Tac-Toe with me!`,
     url: shareUrl,
   };
   try {
+    await navigator.clipboard.writeText(shareUrl);
     if (navigator.share) {
       await navigator.share(shareData);
-      shareFeedback.textContent = "Invite sent!";
+      NotifyX.success("Invite sent & URL copied to clipboard!");
     } else {
-      await navigator.clipboard.writeText(shareUrl);
-      shareFeedback.textContent = "Invite URL copied!";
+      NotifyX.success("Invite URL copied to clipboard!");
     }
   } catch (err) {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      shareFeedback.textContent = "Sharing failed, URL copied!";
+      NotifyX.error("Sharing failed, URL copied!");
     } catch (copyErr) {
-      shareFeedback.textContent = "Could not copy URL.";
-      shareFeedback.classList.replace("text-green-400", "text-red-400");
+      NotifyX.error("Could not copy URL!.");
     }
   }
-  shareFeedback.classList.remove("opacity-0");
-  setTimeout(() => {
-    shareFeedback.classList.add("opacity-0");
-    shareFeedback.classList.replace("text-red-400", "text-green-400");
-  }, 3000);
 });
 
 async function updatePlayerStats(gameData) {

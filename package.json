@@ -27,6 +27,9 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@tailwindcss/postcss": "^4.1.12",
     "firebase": "^12.2.1",
+    "js-confetti": "^0.13.1",
+    "notifyx": "^2.2.33",
+    "sweetalert2": "^11.23.0",
     "tailwindcss": "^4.1.12"
   }
 }
