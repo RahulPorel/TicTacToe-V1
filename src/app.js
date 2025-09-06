@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import "./icons.js"; // Importing the icons module to set up FontAwesome icons
 import NotifyX from "notifyx";
-import "notifyx/dist/notifyx.min.css";
+import "./notifyx.min.css";
 import JSConfetti from "js-confetti";
 import Swal from "sweetalert2";
 
