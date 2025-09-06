@@ -450,24 +450,31 @@ shareInviteBtn.addEventListener("click", async () => {
   const shareUrl = `${window.location.origin}${window.location.pathname}?gId=${currentGameId}`;
   const shareData = {
     title: `Tic Tac Toe Challenge!`,
-    text: `Come play Tic-Tac-Toe with me!`,
+    text: `Come play Tic Tac Toe with me!`,
     url: shareUrl,
   };
+
   try {
+    // First, always try to copy the URL to clipboard
     await navigator.clipboard.writeText(shareUrl);
+
+    // Then, try native share if available
     if (navigator.share) {
-      await navigator.share(shareData);
-      NotifyX.success("Invite sent & URL copied to clipboard!");
+      try {
+        await navigator.share(shareData);
+        // Successful share
+        NotifyX.success("Invite sent & URL copied to clipboard!");
+      } catch (shareErr) {
+        // User cancelled the share — not an actual error
+        NotifyX.success("Invite URL copied to clipboard!");
+      }
     } else {
+      // No native share support
       NotifyX.success("Invite URL copied to clipboard!");
     }
   } catch (err) {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      NotifyX.error("Sharing failed, URL copied!");
-    } catch (copyErr) {
-      NotifyX.error("Could not copy URL!.");
-    }
+    // Clipboard failed — real error
+    NotifyX.error("Could not copy Invite URL!");
   }
 });
 
