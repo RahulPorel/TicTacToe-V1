@@ -7,6 +7,11 @@
     "start": "parcel",
     "build": "parcel build"
   },
+  "targets": {
+    "default": {
+      "sourceMap": false
+    }
+  },
   "devDependencies": {
     "@parcel/packager-raw-url": "2.15.4",
     "@parcel/transformer-jsonld": "2.15.4",
