@@ -2,30 +2,38 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // A user's stats document ID must match their authentication ID.
+    // This block contains ALL rules for the playerStats collection.
     match /playerStats/{userId} {
+      // Allow anyone to read stats for the leaderboard.
       allow read: if true;
+
+      // Only the authenticated user can create their own stats document.
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
+
+      // Allow a user to update their own stats, OR allow the game logic
+      // to update only the score fields for any player.
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['wins', 'losses', 'draws']))
+      );
     }
 
+    // This block contains ALL rules for the games collection.
     match /games/{gameId} {
-      // Allow anyone to read game data (needed for the invite message feature).
+      // Allow anyone to read game data (for invite messages and watching games).
       allow read: if true;
 
-      // The person creating the game must be authenticated and listed as player 1.
+      // Only an authenticated user can create a new game.
       allow create: if request.auth != null &&
                       request.resource.data.playerIds[0] == request.auth.uid;
 
-
-      // Allow an update if a user is joining an open game OR is already a player.
-      allow update: if request.auth != null &&
-                      (
-                        // Condition 1: Joining an open game that you are not already in.
-                        (resource.data.playerIds.size() == 1 && !(request.auth.uid in resource.data.playerIds)) ||
-                        // Condition 2: You are already a player in the game (for making moves).
-                        (request.auth.uid in resource.data.playerIds)
-                      );
+      // Allow a user to update a game if they are joining an open spot
+      // OR if they are already a player making a move.
+      allow update: if request.auth != null && (
+        (resource.data.playerIds.size() == 1 && !(request.auth.uid in resource.data.playerIds)) ||
+        (request.auth.uid in resource.data.playerIds)
+      );
     }
   }
 }
+
