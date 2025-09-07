@@ -249,3 +249,6 @@ body {
 .leave-game-actions-container button {
   border-radius: 22px !important;
 }
+.notifyx {
+  backdrop-filter: blur(8px) !important;
+}
