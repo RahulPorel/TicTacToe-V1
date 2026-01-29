@@ -1,8 +1,8 @@
-# 🎮 Multiplayer Tic Tac Toe - Real-Time Gaming Experience
+# Multiplayer Tic Tac Toe - Real-Time Gaming Experience
 
 A modern, real-time multiplayer Tic Tac Toe game built to demonstrate seamless state synchronization, authentic user competition, and a polished UI/UX. This project bridges the gap between classic gaming and modern web technologies.
 
-**[🌐 Live Demo](https://tictactoe.rahulporel.com/)**
+**[Live Demo](https://tictactoe.rahulporel.com/)**
 
 ## Key Features
 
@@ -29,6 +29,7 @@ Built with a focus on performance, scalability, and clean architecture:
 - **Backend & Database**: Firebase Firestore (NoSQL Real-time DB)
 - **Authentication**: Firebase Auth (Anonymous Sessions)
 - **Build Tool**: Parcel (Zero configuration bundler)
+- **Mobile Runtime**: Capacitor (Native Android & iOS support)
 - **Libraries**:
   - `js-confetti` (Visual rewards)
   - `notifyx` (Non-intrusive notifications)
@@ -83,3 +84,49 @@ Want to run this locally? Follow these steps:
     ```bash
     npm run build
     ```
+
+## Mobile Development (Capacitor)
+
+This project uses **Capacitor** to run as a native mobile application on Android and iOS.
+
+### Prerequisites
+
+- **Android**: Install **Android Studio** and the Android SDK.
+- **iOS**: Install **Xcode** (Mac only).
+
+### Building and Running the App
+
+1.  **Build the Web Assets**
+    Always rebuild your web project before syncing with mobile platforms to ensure the latest changes are applied.
+
+    ```bash
+    # Build the web project
+    pnpm run build
+    ```
+
+2.  **Sync with Capacitor**
+    Copy the built web assets to the native Android/iOS project directories.
+
+    ```bash
+    npx cap sync
+    ```
+
+3.  **Run on Android**
+    Open the project in Android Studio to build and run the app on a device or emulator.
+
+    ```bash
+    npx cap open android
+    ```
+
+    - Once Android Studio opens, select your connected device or emulator from the toolbar.
+    - Click the **Run** (Play) button to build and install the APK.
+
+4.  **Run on iOS (Mac Only)**
+    Open the project in Xcode.
+
+    ```bash
+    npx cap open ios
+    ```
+
+    - Select your target simulator or device.
+    - Click the **Run** (Play) button.
