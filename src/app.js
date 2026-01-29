@@ -1,25 +1,25 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import {
-  getFirestore,
+  addDoc,
+  collection,
   doc,
   getDoc,
-  addDoc,
-  onSnapshot,
-  collection,
-  updateDoc,
-  runTransaction,
-  query,
-  orderBy,
-  limit,
-  setDoc,
-  where,
   getDocs,
+  getFirestore,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  runTransaction,
+  setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import "./icons.js"; // Importing the icons module to set up FontAwesome icons
-import NotifyX from "notifyx";
 import JSConfetti from "js-confetti";
+import NotifyX from "notifyx";
 import Swal from "sweetalert2";
+import "./icons.js"; // Importing the icons module to set up FontAwesome icons
 
 const screens = {
   auth: document.getElementById("auth-screen"),
@@ -57,14 +57,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Game State Variables ---
-let currentUserId = null; // This will now be the Firebase Auth UID
+// Game State Variables
+let currentUserId = null;
 let currentUsername = null;
 let firebaseUser = null;
 let currentGameId = null;
 let unsubscribeFromGame = null;
 let unsubscribeFromLeaderboard = null;
 let playerStatUnsubscribes = [];
+
+const PRODUCTION_URL = "https://tictactoepr.vercel.app/";
 
 const Winning_Combinations = [
   [0, 1, 2],
@@ -77,7 +79,7 @@ const Winning_Combinations = [
   [2, 4, 6],
 ];
 
-// --- Core App Functions ---
+// Core App Functions
 const showScreen = (screenName) => {
   Object.values(screens).forEach((s) => s.classList.add("hidden"));
   screens[screenName].classList.remove("hidden");
@@ -117,7 +119,6 @@ async function displayInviteMessage() {
   }
 }
 
-// --- App Initialization and Auth Flow ---
 function initializeAppUI() {
   const storedUserName = localStorage.getItem("ticTacToeUserName");
   if (storedUserName) {
@@ -298,11 +299,10 @@ function renderGame(gameData) {
 
   const pX = Object.values(gameData.players).find((p) => p.symbol === "X");
   const pO = Object.values(gameData.players).find((p) => p.symbol === "O");
-  playerXInfo.querySelector(
-    "p.font-bold"
-  ).innerHTML = `<span class="text-2xl" style="color: #00d4ff;">X</span> ${
-    pX ? pX.name : "..."
-  }`;
+  playerXInfo.querySelector("p.font-bold").innerHTML =
+    `<span class="text-2xl" style="color: #00d4ff;">X</span> ${
+      pX ? pX.name : "..."
+    }`;
   playerOInfo.querySelector("p.font-bold").innerHTML = `${
     pO ? pO.name : "..."
   } <span class="text-2xl" style="color: #ff4d94;">O</span>`;
@@ -446,7 +446,13 @@ leaveGameBtn.addEventListener("click", () => {
 });
 
 shareInviteBtn.addEventListener("click", async () => {
-  const shareUrl = `${window.location.origin}${window.location.pathname}?gId=${currentGameId}`;
+  let origin = window.location.origin;
+  // If running on localhost (dev or native app), use the production domain
+  if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+    origin = PRODUCTION_URL;
+  }
+
+  const shareUrl = `${origin}${window.location.pathname}?gId=${currentGameId}`;
   const shareData = {
     title: `Tic Tac Toe Challenge!`,
     text: `Come play Tic Tac Toe with me!`,
@@ -549,6 +555,5 @@ function listenForLeaderboard() {
   });
 }
 
-// --- Initialize the App ---
 initializeAppUI();
 signInAnonymously(auth);
